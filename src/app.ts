@@ -25,7 +25,10 @@ app.use((req, res, next) => {
 });
 
 // Enable CORS for frontend connection
-app.use(cors());
+app.use(cors({
+    origin: "https://erp-frontend-yu7m.onrender.com",
+    credentials: true
+}));
 app.use(helmet());
 app.use(express.json());
 
