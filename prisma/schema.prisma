@@ -1,0 +1,225 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id Int @id @default(autoincrement())
+
+  fullName String
+
+  email String @unique
+
+  phone String @unique
+
+  password String
+
+  role String
+
+  isActive Boolean @default(true)
+
+  createdAt DateTime @default(now())
+
+  updatedAt DateTime @updatedAt
+}
+
+model Customer {
+  id Int @id @default(autoincrement())
+
+  customerCode String @unique
+
+  firstName String
+
+  lastName String
+
+  email String @unique
+
+  phone String @unique
+
+  company String
+
+  gstNumber String?
+
+  address String
+
+  city String
+
+  state String
+
+  country String
+
+  postalCode String
+
+  status String @default("ACTIVE")
+
+  createdAt DateTime @default(now())
+
+  updatedAt DateTime @updatedAt
+
+  orders Order[]
+  Sale   Sale[]
+}
+
+model Inventory {
+  id Int @id @default(autoincrement())
+
+  itemCode String @unique
+
+  itemName String
+
+  category String
+
+  brand String?
+
+  unit String
+
+  quantity Int
+
+  purchasePrice Float
+
+  sellingPrice Float
+
+  minimumStock Int
+
+  warehouse String?
+
+  description String?
+
+  createdAt DateTime @default(now())
+
+  updatedAt DateTime @updatedAt
+
+  orderItems OrderItem[]
+  purchases  Purchase[]
+}
+
+model Order {
+  id Int @id @default(autoincrement())
+
+  orderNumber String @unique
+
+  customerId Int
+
+  totalAmount Float
+
+  status String @default("PENDING")
+
+  createdAt DateTime @default(now())
+
+  updatedAt DateTime @updatedAt
+
+  customer Customer @relation(fields: [customerId], references: [id])
+
+  items OrderItem[]
+
+  payment Payment?
+  Invoice Invoice[]
+  Sale    Sale?
+}
+
+model OrderItem {
+  id Int @id @default(autoincrement())
+
+  orderId Int
+
+  inventoryId Int
+
+  quantity Int
+
+  price Float
+
+  order Order @relation(fields: [orderId], references: [id])
+
+  inventory Inventory @relation(fields: [inventoryId], references: [id])
+}
+
+model Payment {
+  id Int @id @default(autoincrement())
+
+  orderId Int @unique
+
+  paymentMethod String
+
+  paymentStatus String
+
+  transactionId String?
+
+  createdAt DateTime @default(now())
+
+  order Order @relation(fields: [orderId], references: [id])
+}
+
+model Supplier {
+  id            Int        @id @default(autoincrement())
+  supplierCode  String     @unique
+  companyName   String
+  contactPerson String
+  email         String     @unique
+  phone         String     @unique
+  address       String
+  city          String
+  state         String
+  country       String
+  postalCode    String
+  gstNumber     String?
+  status        String     @default("ACTIVE")
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+  purchases     Purchase[]
+}
+
+model Invoice {
+  id        Int      @id @default(autoincrement())
+  invoiceNo String   @unique
+  orderId   Int
+  amount    Float
+  createdAt DateTime @default(now())
+
+  order Order @relation(fields: [orderId], references: [id])
+}
+
+model Purchase {
+  id Int @id @default(autoincrement())
+
+  purchaseNumber String @unique
+
+  supplierId Int
+
+  inventoryId Int
+
+  quantity Int
+
+  purchasePrice Float
+
+  totalAmount Float
+
+  purchaseDate DateTime @default(now())
+
+  status String @default("RECEIVED")
+
+  createdAt DateTime @default(now())
+
+  updatedAt DateTime @updatedAt
+
+  supplier Supplier @relation(fields: [supplierId], references: [id])
+
+  inventory Inventory @relation(fields: [inventoryId], references: [id])
+}
+
+
+model Sale {
+  id          Int      @id @default(autoincrement())
+  saleNumber  String   @unique
+  orderId     Int      @unique
+  customerId  Int
+  totalAmount Float
+  saleDate    DateTime @default(now())
+  createdAt   DateTime @default(now())
+
+  order    Order    @relation(fields: [orderId], references: [id])
+  customer Customer @relation(fields: [customerId], references: [id])
+}
